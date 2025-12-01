@@ -1,10 +1,10 @@
 ﻿namespace OnlineFoodMinimalAPI.Models
 {
-    public static class FoodRepository
+    public class FoodRepository : IFoodRepository
     {
         /* Restaurants data */
 
-        private static List<Restaurant> _restaurants = new List<Restaurant>()
+        private List<Restaurant> _restaurants = new List<Restaurant>()
         {
             new Restaurant(1, "Pizza Palace", "Italian", "123 Main St, CityA", 4, "10:00-22:00"),
             new Restaurant(2, "Sushi World", "Japanese", "456 Ocean Ave, CityB", 5, "11:00-21:00"),
@@ -16,8 +16,8 @@
 
         /* Methods of route starting with Restaurant */
 
-        public static List<Restaurant> GetRestaurants(
-            string? name, 
+        public List<Restaurant> GetRestaurants(
+            string? name,
             string? category,
             double? minRating,
             double? maxRating,
@@ -49,15 +49,15 @@
             return query.ToList();
         }
 
-        public static Restaurant GetRestaurantById(int id)
+        public Restaurant GetRestaurantById(int id)
         {
             return _restaurants.FirstOrDefault(x => x.Id == id);
 
         }
 
-        public static void AddRestaurant(Restaurant restaurant)
+        public void AddRestaurant(Restaurant restaurant)
         {
-            if(restaurant is not null)
+            if (restaurant is not null)
             {
                 int maxId = _restaurants.Max(x => x.Id);
                 restaurant.Id = maxId + 1;
@@ -65,10 +65,10 @@
             }
         }
 
-        public static bool UpdateRestaurant(Restaurant restaurant)
+        public bool UpdateRestaurant(Restaurant restaurant)
         {
             var res = _restaurants.FirstOrDefault(x => x.Id == restaurant.Id);
-            if(res is not null)
+            if (res is not null)
             {
                 res.Name = restaurant.Name;
                 res.Address = restaurant.Address;
@@ -82,9 +82,9 @@
             return false;
         }
 
-        public static bool DeleteRestaurant(Restaurant restaurant)
+        public bool DeleteRestaurant(Restaurant restaurant)
         {
-           if(restaurant is not null)
+            if (restaurant is not null)
             {
                 _restaurants.Remove(restaurant);
                 return true;
@@ -97,7 +97,7 @@
         /* Restaurants menu's data */
 
 
-        private static List<MenuItem> _menuItems = new List<MenuItem>
+        private List<MenuItem> _menuItems = new List<MenuItem>
         {
             new MenuItem { Id = 1, RestaurantId = 1, Name = "Margherita Pizza", Description = "Classic cheese & tomato", Price = 8.99d, Tags = "Italian,Pizza" },
             new MenuItem { Id = 2, RestaurantId = 1, Name = "Pepperoni Pizza", Description = "Pepperoni, cheese, tomato", Price = 10.99d, Tags = "Italian,Pizza" },
@@ -119,24 +119,24 @@
         };
 
         /* Methods of route with menu */
-        public static List<MenuItem> GetMenu(Restaurant restaurant)
+        public List<MenuItem> GetMenu(Restaurant restaurant)
         {
             return _menuItems.Where(x => x.RestaurantId == restaurant.Id).ToList();
         }
 
-        public static List<MenuItem> GetAllMenu(int? restaurantId,
+        public List<MenuItem> GetAllMenu(int? restaurantId,
             string? name,
             string? description,
             double? minPrice,
-            double? maxPrice, 
+            double? maxPrice,
             string? sortBy,
             bool? desc)
-            { 
+        {
             IEnumerable<MenuItem> query = _menuItems;
 
             if (name is not null)
                 query = query.Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
-            if(description is not null)
+            if (description is not null)
                 query = query.Where(x => x.Name.Contains(description, StringComparison.OrdinalIgnoreCase));
             if (minPrice.HasValue)
                 query = query.Where(r => r.Price >= minPrice.Value);
@@ -154,20 +154,20 @@
 
         }
 
-        public static MenuItem GetMenuById(int id, Restaurant restaurant)
+        public MenuItem GetMenuById(int id, Restaurant restaurant)
         {
             var menus = GetMenu(restaurant);
             return menus.FirstOrDefault(x => x.Id == id);
         }
 
-        public static void AddMenu(MenuItem menu)
+        public void AddMenu(MenuItem menu)
         {
             int menuId = _menuItems.Max(x => x.Id);
             menu.Id = menuId + 1;
             _menuItems.Add(menu);
         }
 
-        public static bool UpdateMenuItem(MenuItem menuItem)
+        public bool UpdateMenuItem(MenuItem menuItem)
         {
             var menu = _menuItems.FirstOrDefault(x => x.Id == menuItem.Id);
             if (menu is not null)
@@ -184,9 +184,9 @@
             return false;
         }
 
-        public static bool DeleteMenu(MenuItem menuItem)
+        public bool DeleteMenu(MenuItem menuItem)
         {
-            if(menuItem is not null)
+            if (menuItem is not null)
             {
                 _menuItems.Remove(menuItem);
                 return true;

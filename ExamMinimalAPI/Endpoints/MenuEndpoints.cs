@@ -13,17 +13,18 @@ namespace OnlineFoodMinimalAPI.Endpoints
                 double? minPrice,
                 double? maxPrice,
                 string? sortBy,
-                bool? desc
+                bool? desc,
+                IFoodRepository foodRepository
                 ) =>
                 {
-                var menus = FoodRepository.GetAllMenu(restaurantId, name, description, minPrice, maxPrice,
+                var menus = foodRepository.GetAllMenu(restaurantId, name, description, minPrice, maxPrice,
                       sortBy, desc);
 
                 return Results.Ok(menus);
                       });
 
-            app.MapGet("/restaurants/{id}/menu", (int id) => {
-                var restaurant = FoodRepository.GetRestaurantById(id);
+            app.MapGet("/restaurants/{id}/menu", (int id, IFoodRepository foodRepository) => {
+                var restaurant = foodRepository.GetRestaurantById(id);
                 if (restaurant is null)
                 {
                 return Results.ValidationProblem(new Dictionary<string, string[]>
@@ -32,14 +33,14 @@ namespace OnlineFoodMinimalAPI.Endpoints
                         });
                   }
 
-                var menus = FoodRepository.GetMenu(restaurant);
+                var menus = foodRepository.GetMenu(restaurant);
 
                 return TypedResults.Ok(menus);
 
             });
 
-            app.MapGet("/restaurants/{id}/menu/{menuItemId:int}", (int id, int menuItemId) => {
-                var restaurant = FoodRepository.GetRestaurantById(id);
+            app.MapGet("/restaurants/{id}/menu/{menuItemId:int}", (int id, int menuItemId, IFoodRepository foodRepository) => {
+                var restaurant = foodRepository.GetRestaurantById(id);
                 if (restaurant is null)
                 {
                     return Results.ValidationProblem(new Dictionary<string, string[]>
@@ -48,7 +49,7 @@ namespace OnlineFoodMinimalAPI.Endpoints
                   });
                 }
 
-                var menu = FoodRepository.GetMenuById(menuItemId, restaurant);
+                var menu = foodRepository.GetMenuById(menuItemId, restaurant);
 
                 return menu is not null
                 ? TypedResults.Ok(menu)
@@ -58,7 +59,7 @@ namespace OnlineFoodMinimalAPI.Endpoints
                     });
             });
 
-            app.MapPost("/restaurants/{id}/menu", (int id, MenuItem menu) => {
+            app.MapPost("/restaurants/{id}/menu", (int id, MenuItem menu, IFoodRepository foodRepository) => {
                 // 1.Validation body
                 if (menu is null)
                           {
@@ -69,7 +70,7 @@ namespace OnlineFoodMinimalAPI.Endpoints
                 }
 
                 // 2.Restaurant must exist
-                var restaurant = FoodRepository.GetRestaurantById(id);
+                var restaurant = foodRepository.GetRestaurantById(id);
                 if (restaurant is null)
                 {
                     return Results.ValidationProblem(new Dictionary<string, string[]>
@@ -81,12 +82,12 @@ namespace OnlineFoodMinimalAPI.Endpoints
                 // 3.Ensure RestaurantID is correct
                 menu.RestaurantId = id;
 
-                FoodRepository.AddMenu(menu);
+                foodRepository.AddMenu(menu);
 
                 return TypedResults.Created($"/restaurants/{id:int}/menu/{menu.Id}", menu);
             }).WithParameterValidation();
 
-            app.MapPut("/restaurants/{id}/menu/{menuItemId:int}", (int id, int menuItemId, MenuItem menuItem) =>
+            app.MapPut("/restaurants/{id}/menu/{menuItemId:int}", (int id, int menuItemId, MenuItem menuItem, IFoodRepository foodRepository) =>
             {
                 if (menuItem is null)
                 {
@@ -104,7 +105,7 @@ namespace OnlineFoodMinimalAPI.Endpoints
                     });
                 }
 
-                var restaurant = FoodRepository.GetRestaurantById(id);
+                var restaurant = foodRepository.GetRestaurantById(id);
                 if (restaurant is null)
                 {
                     return Results.ValidationProblem(new Dictionary<string, string[]>
@@ -121,7 +122,7 @@ namespace OnlineFoodMinimalAPI.Endpoints
                       });
                 }
 
-                var updated = FoodRepository.UpdateMenuItem(menuItem);
+                var updated = foodRepository.UpdateMenuItem(menuItem);
 
                 return updated
                    ? TypedResults.NoContent()
@@ -132,8 +133,8 @@ namespace OnlineFoodMinimalAPI.Endpoints
 
                           });
 
-            app.MapDelete("/restaurants/{id}/menu/{menuItemId:int}", (int id, int menuItemId) => {
-                var restaurant = FoodRepository.GetRestaurantById(id);
+            app.MapDelete("/restaurants/{id}/menu/{menuItemId:int}", (int id, int menuItemId, IFoodRepository foodRepository) => {
+                var restaurant = foodRepository.GetRestaurantById(id);
 
                 if (restaurant is null)
                 {
@@ -143,7 +144,7 @@ namespace OnlineFoodMinimalAPI.Endpoints
                        });
                 }
 
-                var menu = FoodRepository.GetMenuById(menuItemId, restaurant);
+                var menu = foodRepository.GetMenuById(menuItemId, restaurant);
                 if (menu is null)
                 {
                     return Results.ValidationProblem(new Dictionary<string, string[]>
@@ -151,7 +152,7 @@ namespace OnlineFoodMinimalAPI.Endpoints
              { "menuId", new[] { $"Menu item with id {menuItemId} does not exist." } }
                         });
                 }
-                var IsDeleted = FoodRepository.DeleteMenu(menu);
+                var IsDeleted = foodRepository.DeleteMenu(menu);
 
 
                 return IsDeleted

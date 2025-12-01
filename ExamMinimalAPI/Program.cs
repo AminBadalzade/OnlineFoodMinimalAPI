@@ -6,7 +6,7 @@ using OnlineFoodMinimalAPI.Endpoints;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
 
-
+builder.Services.AddSingleton<IFoodRepository, FoodRepository>();
 
 var app = builder.Build();
 if (!app.Environment.IsDevelopment())
